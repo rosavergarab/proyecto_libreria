@@ -15,8 +15,7 @@ const app = express();
 //ARREGLOS
 //creo el arreglo Usuarios para ir almacenando los usuarios
 let usuarios = [];
-//creo el arreglo que va a almacenar los tokens
-let arreglo_tokens =[];
+
 
 //variable de morgan para ir creando el log de acceso. 
 var accessLogStream = fs.createWriteStream(`${config.files.path}/${config.files.filename.accessLog}`, {flags: `a` });
@@ -27,13 +26,18 @@ var accessLogStream = fs.createWriteStream(`${config.files.path}/${config.files.
 
 const auth = (req, res, next) =>{
     let token = req.headers[`x-access-token`];
-    const decoded = jwt.verify(token, config.tokenKey);
-    console.log(decoded.username);
-    res.sendStatus(500);
-    /*arreglo_tokens.includes(token) ? 
+    let decoded;
+    try {
+        decoded =  jwt.verify(token, config.tokenKey); 
+    } catch(error)
+    {
+        decoded = false;
+    }
+    
+    !!decoded ? 
     next()
     :
-    res.status(500).send(`usuario no autorizado`);*/
+    res.status(500).send(`usuario no autorizado`);
 };
 
 app.use(nocache());
@@ -63,11 +67,15 @@ app.get(`/users`, auth, (req, res)=>{
 
 //Ruta para ir agregando los usuarios
 app.post(`/users`,(req, res) =>{
+    const plainPassword = req.body.password;
+    const salt = bcrypt.genSaltSync(config.saltRounds);
+    const hash = bcrypt.hashSync(plainPassword, salt);
+    
     let usuario = {
         name: req.body.name,
         lastname: req.body.lastname,
         username: req.body.username,
-        password: req.body.password,
+        password: hash,
         doc: req.body.doc
     };
     usuarios.push(usuario);
@@ -83,7 +91,8 @@ app.post(`/users/login`, (req, res) =>{
     const username = req.body.username;
     const password = req.body.password;
 
-    if(!!usuarios.find(usuario => usuario.username === username && usuario.password === password))
+    if(!!usuarios.find(usuario => usuario.username === username && 
+        bcrypt.compareSync(password,usuario.password)))
     {
         const token = jwt.sign({username: username}, config.tokenKey);
         
