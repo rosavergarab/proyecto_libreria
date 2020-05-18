@@ -27,10 +27,13 @@ var accessLogStream = fs.createWriteStream(`${config.files.path}/${config.files.
 
 const auth = (req, res, next) =>{
     let token = req.headers[`x-access-token`];
-    arreglo_tokens.includes(token) ? 
+    const decoded = jwt.verify(token, config.tokenKey);
+    console.log(decoded.username);
+    res.sendStatus(500);
+    /*arreglo_tokens.includes(token) ? 
     next()
     :
-    res.status(500).send(`usuario no autorizado`);
+    res.status(500).send(`usuario no autorizado`);*/
 };
 
 app.use(nocache());
@@ -82,9 +85,9 @@ app.post(`/users/login`, (req, res) =>{
 
     if(!!usuarios.find(usuario => usuario.username === username && usuario.password === password))
     {
-        const r = Math.random();
-        arreglo_tokens.push(r.toString());
-        res.status(200).send(`el token es: ${r}`);
+        const token = jwt.sign({username: username}, config.tokenKey);
+        
+        res.status(200).send(`el token es: ${token}`);
 
     }
     else {
@@ -157,7 +160,7 @@ app.listen(config.port, ()=> {
         if(err){
             console.log(`Ocurrió un error leyendo el archivo`);
         };
-        //usuarios = JSON.parse(data);
+        usuarios = JSON.parse(data);
     });
     console.log(`Servidor iniciado`);
 });
