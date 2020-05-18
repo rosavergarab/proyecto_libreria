@@ -1,0 +1,2 @@
+App de libros
+API para gestión de libros que cuenta con algunas rutas públicas y otras privadas. Las rutas privadas deben ser autenticadas con un middelware que utilice un token basado en el módulo jsonwebtoken. 
