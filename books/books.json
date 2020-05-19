@@ -1,0 +1,27 @@
+[
+    {
+        "id": "12345",
+        "name":"Cien Años de Soledad",
+        "author":"Gabriel Garcia Marquez"
+    },
+    {
+        "id": "67890",
+        "name":"El Principito",
+        "author":"Antoine De Saint Exupery"
+    },
+    {
+        "id": "24680",
+        "name":"El alquimista",
+        "author":"Paulo Coelho"
+    },
+    {
+        "id": "13579",
+        "name":"El Perfume",
+        "author":"Patrik Suskind"
+    },
+    {
+        "id": "98765",
+        "name":"El diario de Ana Frank",
+        "author":"Anne Frank"
+    }
+]

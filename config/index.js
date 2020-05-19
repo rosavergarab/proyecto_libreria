@@ -9,6 +9,14 @@ const config = {
             errorLog: "error.log",
             accessLog: "access.log"
         }
+    },
+    books:{
+        path:"books",
+        bookname:{
+            books:"books.json",
+            berrorLog:"error.log",
+            baccessLog:"access.log"
+        }
     }
 };
 module.exports = config;

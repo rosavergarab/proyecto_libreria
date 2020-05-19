@@ -15,7 +15,7 @@ const app = express();
 //ARREGLOS
 //creo el arreglo Usuarios para ir almacenando los usuarios
 let usuarios = [];
-
+let libros = [];
 
 //variable de morgan para ir creando el log de acceso. 
 var accessLogStream = fs.createWriteStream(`${config.files.path}/${config.files.filename.accessLog}`, {flags: `a` });
@@ -46,11 +46,54 @@ app.use(morgan(`combined`, { stream: accessLogStream }));
 
 //Rutas
 
-//Ruta raiz /, para lo cual vamos a pedir que muestre error
+//Parte 1 - Rutas de los libros
+
+//Ruta raiz /, para lo cual vamos a listar los libros existentes en el array de libros
 app.get(`/`,(req, res)=>{
+    
+    let cadena_libros =``;
+
+    for(u in libros){
+        cadena_libros += `\nId del Libro: ${libros[u].id} - Nombre del Libro: ${libros[u].name} - Autor: ${libros[u].author}`;
+    };
     res
-    .sendStatus(500)
+    .status(200)
+    .send(`Los Libros disponibles son: ${cadena_libros}`);
 });
+
+//Ruta de libros por ID
+app.get(`/books/:id`, auth, (req, res)=>{
+    
+    let id = req.params.id;
+   
+   for (u in libros){
+        if (id === libros[u].id){
+        res
+        .status(200)
+        .send(`El libro solicitado es ${libros[u].name}`); 
+        }
+        else{
+            res
+            .status(500)
+            .send(`El libro solictado con ese ID no aparece`);
+        }
+    }
+});
+
+//Ruta para ir agregando los libros
+app.post(`/books`,(req, res) =>{
+    let libro = {
+        id: req.body.id,
+        name: req.body.name,
+        author: req.body.author,
+    };
+    libros.push(libro);
+    res
+    .status(200)
+    .send(`El Libro ${libro.name} fue creado`);
+});
+
+//Parte 2 - Ruta de los usuarios
 
 //Ruta es la de listar los usuarios
 app.get(`/users`, auth, (req, res)=>{
@@ -104,67 +147,11 @@ app.post(`/users/login`, (req, res) =>{
     }
 });
 
-//Ruta para actualizar un usuario
-app.put(`/users`,(req, res) =>{
-    let usuario = {
-        name: req.body.name,
-        lastname: req.body.lastname,
-        username: req.body.username,
-        password: req.body.password,
-        doc: req.body.doc
-    };
-    if (usuario.username ===``)
-    {
-        res
-        .status(501)
-        .send(`El usuario no ha sido creado`);
-    } else
-    {   
-        for (u in usuarios)
-        {
-            if(usuarios[u].username === usuario.username)
-            {
-                usuarios[u].name = usuario.name;
-                usuarios[u].password = usuario.password;
-            }
-        }
-        res
-        .status(200)
-        .send(`El usuario ${usuario.name} fue actualizado`);
-    }
-});
-
-//Ruta para borrar un usuario
-app.delete(`/users`,(req, res) =>{
-    let usuario = {
-        username: req.body.username,
-    };
-    const usuario2 = req.body.username;
-
-    if (usuario.username ===``)
-    {
-        res
-        .status(501)
-        .send(`El usuario no ha sido creado`);
-    } else
-    {   
-        for (u in usuarios)
-        {
-            if(usuarios[u].username === usuario.username)
-            {
-                usuarios.splice(u,1);
-            }
-        }
-        res
-        .status(200)
-        .send(`El usuario ${usuario2} fue eliminado`);
-    }
-});
 
 
 
 app.listen(config.port, ()=> {
-    //se va a realizar la función de leer un archivo
+    //se va a realizar la función de leer un archivo para users
     fs.readFile(`./${config.files.path}/${config.files.filename.users}`, `utf8`, (err, data)=>{
         if(err){
             console.log(`Ocurrió un error leyendo el archivo`);
