@@ -6,16 +6,8 @@ const config = {
         path: "files",
         filename: {
             users:"users.json",
-            errorLog: "error.log",
+            auditLog: "audit.log",
             accessLog: "access.log"
-        }
-    },
-    books:{
-        path:"books",
-        bookname:{
-            books:"books.json",
-            berrorLog:"error.log",
-            baccessLog:"access.log"
         }
     }
 };

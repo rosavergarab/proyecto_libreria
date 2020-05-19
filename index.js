@@ -22,6 +22,24 @@ var accessLogStream = fs.createWriteStream(`${config.files.path}/${config.files.
 
 //MIDDLEWARES
 
+//middleware del log audit creado manual. 
+const auditoria = (req, res, next)=>{  
+
+    //crea la variable log para almacenar lo que ira en el log
+    const log = {
+        fecha: new Date(),
+        ruta: req.path,
+        usuario: req.body.username
+    };    
+    
+    fs.appendFile(`./${config.files.path}/${config.files.filename.auditLog}`,`${JSON.stringify(log)}`, (err) => {
+        if (err){
+            console.log(`Ocurrió un error escribiendo en el archivo`);
+        };
+    });
+    next();
+};
+
 //middleware de autenticación
 
 const auth = (req, res, next) =>{
@@ -40,16 +58,24 @@ const auth = (req, res, next) =>{
     res.status(500).send(`usuario no autorizado`);
 };
 
+const access = (req, res, next) =>{
+    
+    morgan(`combined`, { stream: accessLogStream });
+    next();
+    
+};
+
+
 app.use(nocache());
 app.use(bodyParser.json());
-app.use(morgan(`combined`, { stream: accessLogStream }));
+
 
 //Rutas
 
 //Parte 1 - Rutas de los libros
 
 //Ruta raiz /, para lo cual vamos a listar los libros existentes en el array de libros
-app.get(`/`,(req, res)=>{
+app.get(`/`, access, (req, res)=>{
     
     let cadena_libros =``;
 
@@ -62,15 +88,17 @@ app.get(`/`,(req, res)=>{
 });
 
 //Ruta de libros por ID
-app.get(`/books/:id`, auth, (req, res)=>{
+app.get(`/books/:id`, access, (req, res)=>{
     
-    let id = req.params.id;
-   
-   for (u in libros){
-        if (id === libros[u].id){
+    const id = req.params.id;
+    console.log(id);
+
+   for (let i=0; i< libros.length; i++){
+        console.log(libros[i].id);
+    if (id == libros[i].id){
         res
         .status(200)
-        .send(`El libro solicitado es ${libros[u].name}`); 
+        .send(`El libro solicitado es ${libros[i].name}`); 
         }
         else{
             res
@@ -81,7 +109,7 @@ app.get(`/books/:id`, auth, (req, res)=>{
 });
 
 //Ruta para ir agregando los libros
-app.post(`/books`,(req, res) =>{
+app.post(`/books`, auth, access, (req, res) =>{
     let libro = {
         id: req.body.id,
         name: req.body.name,
@@ -129,7 +157,7 @@ app.post(`/users`,(req, res) =>{
 
 //Ruta para el login de los usuarios
 
-app.post(`/users/login`, (req, res) =>{
+app.post(`/users/login`, auditoria, (req, res) =>{
 
     const username = req.body.username;
     const password = req.body.password;
