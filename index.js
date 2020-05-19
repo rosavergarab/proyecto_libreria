@@ -40,6 +40,9 @@ const auditoria = (req, res, next)=>{
     next();
 };
 
+//middleware de access
+var logAccess = morgan(`combined`, { stream: accessLogStream });
+
 //middleware de autenticación
 
 const auth = (req, res, next) =>{
@@ -61,14 +64,14 @@ const auth = (req, res, next) =>{
 
 app.use(nocache());
 app.use(bodyParser.json());
-app.use(morgan(`combined`, { stream: accessLogStream }));
+//app.use(morgan(`combined`, { stream: accessLogStream }));
 
 //Rutas
 
 //Parte 1 - Rutas de los libros
 
 //Ruta raiz /, para lo cual vamos a listar los libros existentes en el array de libros
-app.get(`/`, (req, res)=>{
+app.get(`/`, logAccess, (req, res)=>{
     
     let cadena_libros =``;
 
@@ -81,7 +84,7 @@ app.get(`/`, (req, res)=>{
 });
 
 //Ruta de libros por ID
-app.get(`/books/:id`, (req, res)=>{
+app.get(`/books/:id`, logAccess, (req, res)=>{
     
     const id = req.params.id;
     let cadena_resultado =``;
@@ -101,7 +104,7 @@ app.get(`/books/:id`, (req, res)=>{
 });
 
 //Ruta para ir agregando los libros
-app.post(`/books`, auth, (req, res) =>{
+app.post(`/books`, auth, logAccess, (req, res) =>{
     let libro = {
         id: req.body.id,
         name: req.body.name,
