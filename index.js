@@ -58,17 +58,10 @@ const auth = (req, res, next) =>{
     res.status(500).send(`usuario no autorizado`);
 };
 
-const access = (req, res, next) =>{
-    
-    morgan(`combined`, { stream: accessLogStream });
-    next();
-    
-};
-
 
 app.use(nocache());
 app.use(bodyParser.json());
-
+app.use(morgan(`combined`, { stream: accessLogStream }));
 
 //Rutas
 
