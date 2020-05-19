@@ -68,7 +68,7 @@ app.use(morgan(`combined`, { stream: accessLogStream }));
 //Parte 1 - Rutas de los libros
 
 //Ruta raiz /, para lo cual vamos a listar los libros existentes en el array de libros
-app.get(`/`, access, (req, res)=>{
+app.get(`/`, (req, res)=>{
     
     let cadena_libros =``;
 
@@ -81,28 +81,27 @@ app.get(`/`, access, (req, res)=>{
 });
 
 //Ruta de libros por ID
-app.get(`/books/:id`, access, (req, res)=>{
+app.get(`/books/:id`, (req, res)=>{
     
     const id = req.params.id;
-    console.log(id);
+    let cadena_resultado =``;
 
    for (let i=0; i< libros.length; i++){
-        console.log(libros[i].id);
-    if (id == libros[i].id){
+        
+
+        if (id == libros[i].id){
+            cadena_resultado = libros[i].name;
+            
+        }
+    }    
         res
         .status(200)
-        .send(`El libro solicitado es ${libros[i].name}`); 
-        }
-        else{
-            res
-            .status(500)
-            .send(`El libro solictado con ese ID no aparece`);
-        }
-    }
+        .send(`El libro solicitado es ${cadena_resultado}`); 
+    
 });
 
 //Ruta para ir agregando los libros
-app.post(`/books`, auth, access, (req, res) =>{
+app.post(`/books`, auth, (req, res) =>{
     let libro = {
         id: req.body.id,
         name: req.body.name,
